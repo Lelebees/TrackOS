@@ -1,5 +1,5 @@
-//Script made by Lelebees: Last update at 18-10-2021 10:15 UTC+2 (Central European Summer Time)
-//TrackOS V1.2 (Not backwards compatible)
+//Script made by Lelebees: Last update at 1-12-2021 13:18 UTC+1 (Central European Time)
+//TrackOS V1.2.1 (Not backwards compatible)
 
 //Tweakable variables below here
 string antennaName = "Antenna";
@@ -60,10 +60,6 @@ public Program() //This is the setup, which is automatically ran every time scri
 
 public void Main(string arg, UpdateType updateType) 
 {
-    // Usually I verify that the argument is empty or a predefined value before running the state
-    // machine. This way we can use arguments to control the script without disturbing the
-    // state machine and its timing. For the purpose of this example however, I will omit this.
-
     // We only want to run the state machine(s) when the update type includes the
     // "Once" flag, to avoid running it more often than it should. It shouldn't run
     // on any other trigger. This way we can combine state machine running with
@@ -79,9 +75,8 @@ public void Main(string arg, UpdateType updateType)
         switch(arg) 
         { 
             case "send":
-                _stateMachine = Send(broadcastChannel); //this is where we set messageText
+                _stateMachine = Send(broadcastChannel); //Send coordinates (Method on line 130)
                 Runtime.UpdateFrequency |= UpdateFrequency.Once;
-            //RunStateMachine();
                 break;
             
             case "get id":
@@ -89,7 +84,7 @@ public void Main(string arg, UpdateType updateType)
                 break;    
             
             default:
-                Loop();
+                _stateMachine = Loop(); //We're using yield statements in the loop method for checking Endpoint, therefore, we need a statemachine
                 break;
         }
     }
@@ -116,7 +111,7 @@ public void RunStateMachine()
         {
             // The state machine still has more work to do, so signal another run again, 
             // just like at the beginning.
-            Runtime.UpdateFrequency |= UpdateFrequency.Once;
+            Runtime.UpdateFrequency |= UpdateFrequency.Once; // Here we add the ONCE flag, telling the program to stop, and run again in the next tick. It will continue where it left off.
         } 
         else 
         {
@@ -132,47 +127,33 @@ public void RunStateMachine()
     }
 }
 
-// ***MARKER: Coroutine Example
-// The return value (bool in this case) is not important for this example. It is not
-// actually in use.
 public IEnumerator<bool> Send(string broadcastChannel) 
 {
-
-    // Then we will tell the script to stop execution here and let the game do it's
-    // thing. The time until the code continues on the next line after this yield return
-    // depends  on your State Machine Execution and the timer setup.
-    // The `true` portion is there simply because an enumerator needs to return a value
-    // per item, in our case the value simply has no meaning at all. You _could_ utilize
-    // it for a more advanced scheduler if you want, but that is beyond the scope of this
-    // tutorial.
 
     //pepare for sending
     antenna.EnableBroadcasting = true;
     messageCount++;
     Vector3D Position = Me.GetPosition();
-    string messageText = $"GPS:Tracker Location {messageCount}:{Position.X}:{Position.Y}:{Position.Z}:#FF0000:";
-    Echo ("DEBUG A");
+    string messageText = $"GPS:Tracker Location {messageCount}:{Position.X}:{Position.Y}:{Position.Z}:#FF0000:"; // Format the text so it can by copy-pasted into GPS list
 
-    yield return true; //wait* a tick 
-    yield return true;
+    yield return true; //wait* a tick
     
     //Send the message
     IGC.SendBroadcastMessage(broadcastChannel, messageText, TransmissionDistance.TransmissionDistanceMax);  
 	textSurface.WriteText ("sent message ["+messageCount+"] succesfully.\n", true);
     
-    //custom actions box (When something has been sent)
-    Echo("DEBUG B");
+    //custom actions box (When something is being sent)
+    
     //end of custom actions box
     
     //prepare for ending the send thing
     yield return true; //wait* a tick
     yield return true; // wait another tick so this fucking thing actually sends
     
-    // the following comment has been left in to illustrate my struggles with the program, it is no longer relevant
+    //NOTE: the following comment has been left in to illustrate my struggles with the program, it is no longer relevant
     //okay so that didnt "Work" either. It does get to all this shite but no send. GO 9 YIELDS
 
     antenna.EnableBroadcasting = false;
-    Echo("DEBUG C");
     
     // *The program doesn't actually wait. It stops and runs from that point on the next tick. this lowers the instruction count, making the script more preformance friendly, however, we're using it to make a delay in between certain actions
     //IT WORKS, WHAHAHAH YES IT WORKS! FUCK YOU COROUTINES, I AM A GOD OF SCRIPTING! TREMBLE IN FEAR BEFORE THE GREAT AND MIGHTY LELEBEES!
@@ -194,6 +175,7 @@ public void Receive(string broadcastChannel) //IGC magik
         //Do something with the information!
         if (policeSender == true)
         {
+            //TODO: Evaluate if this is even necessary
             if (messageSender == allowedProgBlockID)
             {
                 textSurface.WriteText("Message received on channel "+receivedChannel+"\n", true);
@@ -229,7 +211,7 @@ public void GetID()
     textSurface.WriteText("ID saved to CustomData\n", true);
 }
 
-public void Loop()
+public IEnumerator<bool> Loop()
 {
     if(receiverSystem)
     {
@@ -237,13 +219,18 @@ public void Loop()
     }
     else if(checkingRange)
     {
+        //TODO: minimize channel open time
+        antenna.EnableBroadcasting = true;
+        yield return true;
         bool endpoint = IGC.IsEndpointReachable(receiverProgBlockID, TransmissionDistance.TransmissionDistanceMax);
-        
+        yield return true;
+        antenna.EnableBroadcasting = false;
+
         if(endpoint && sentInrangeMessage == false)
         {
             //this will immedeately trigger the send command so location is broadcasted.
             _stateMachine = Send(broadcastChannel);
-            Runtime.UpdateFrequency |= UpdateFrequency.Once;
+            Runtime.UpdateFrequency |= UpdateFrequency.Once; //TEST IF THIS IS NECESSARY
             sentInrangeMessage = true;
             textSurface.WriteText("Found Receiver in range! Sent co-ordinates immedeately!\n", false);
             //custom actions box when a reciever has been found in range
@@ -263,4 +250,4 @@ public void Loop()
     }
 }
 
-//Virtually Invisible Communication Protocol : VICP (looks a lot like VOIP)
+//Virtually Invisible Communication Protocol : VICP
