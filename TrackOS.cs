@@ -23,6 +23,7 @@ int timeDelay = 1800; //delay between send commands in ticks (60 ticks = 1 secon
 bool sentInrangeMessage = false;
 int messageCount = 0;
 int tickCount = 0;
+bool endpoint = false;
 IMyRadioAntenna antenna;
 IMyTerminalBlock statusDisplay;
 IMyTextSurface textSurface;
@@ -52,8 +53,8 @@ public Program() //This is the setup, which is automatically ran every time scri
 
     if (receiverSystem == false)
     {
-        _stateMachine = Send(broadcastChannel);
-        Runtime.UpdateFrequency |= UpdateFrequency.Once;
+        //_stateMachine = Send(broadcastChannel);
+        //Runtime.UpdateFrequency |= UpdateFrequency.Once;
         Echo ("Sending test complete. System should be ready to send coordinates.");
     }
 }
@@ -85,6 +86,7 @@ public void Main(string arg, UpdateType updateType)
             
             default:
                 _stateMachine = Loop(); //We're using yield statements in the loop method for checking Endpoint, therefore, we need a statemachine
+                Runtime.UpdateFrequency |= UpdateFrequency.Once;
                 break;
         }
     }
@@ -129,31 +131,33 @@ public void RunStateMachine()
 
 public IEnumerator<bool> Send(string broadcastChannel) 
 {
-
     //pepare for sending
-    antenna.EnableBroadcasting = true;
     messageCount++;
     Vector3D Position = Me.GetPosition();
     string messageText = $"GPS:Tracker Location {messageCount}:{Position.X}:{Position.Y}:{Position.Z}:#FF0000:"; // Format the text so it can by copy-pasted into GPS list
-
+    //Everything has been prepared, we can now open the broadcasting channel
+    antenna.EnableBroadcasting = true;
     yield return true; //wait* a tick
-    
+    //TODO: Evaluate if this yield is necessary
     //Send the message
     IGC.SendBroadcastMessage(broadcastChannel, messageText, TransmissionDistance.TransmissionDistanceMax);  
-	textSurface.WriteText ("sent message ["+messageCount+"] succesfully.\n", true);
-    
-    //custom actions box (When something is being sent)
-    
-    //end of custom actions box
     
     //prepare for ending the send thing
     yield return true; //wait* a tick
     yield return true; // wait another tick so this fucking thing actually sends
+	
+    //Close the broadcast so detection is now impossible
+    antenna.EnableBroadcasting = false;
+    
+    textSurface.WriteText ("sent message ["+messageCount+"] succesfully.\n", true);
+    
+    //custom actions box (When something is sent)
+    
+    //end of custom actions box
     
     //NOTE: the following comment has been left in to illustrate my struggles with the program, it is no longer relevant
     //okay so that didnt "Work" either. It does get to all this shite but no send. GO 9 YIELDS
 
-    antenna.EnableBroadcasting = false;
     
     // *The program doesn't actually wait. It stops and runs from that point on the next tick. this lowers the instruction count, making the script more preformance friendly, however, we're using it to make a delay in between certain actions
     //IT WORKS, WHAHAHAH YES IT WORKS! FUCK YOU COROUTINES, I AM A GOD OF SCRIPTING! TREMBLE IN FEAR BEFORE THE GREAT AND MIGHTY LELEBEES!
@@ -219,20 +223,38 @@ public IEnumerator<bool> Loop()
     }
     else if(checkingRange)
     {
-        //TODO: minimize channel open time
         antenna.EnableBroadcasting = true;
         yield return true;
-        bool endpoint = IGC.IsEndpointReachable(receiverProgBlockID, TransmissionDistance.TransmissionDistanceMax);
+        endpoint = IGC.IsEndpointReachable(receiverProgBlockID, TransmissionDistance.TransmissionDistanceMax);
+        yield return true;
         yield return true;
         antenna.EnableBroadcasting = false;
+    
 
-        if(endpoint && sentInrangeMessage == false)
+        if(endpoint == true & sentInrangeMessage == false)
         {
             //this will immedeately trigger the send command so location is broadcasted.
-            _stateMachine = Send(broadcastChannel);
-            Runtime.UpdateFrequency |= UpdateFrequency.Once; //TEST IF THIS IS NECESSARY
+            //pepare for sending
+            messageCount++;
+            Vector3D Position = Me.GetPosition();
+            string messageText = $"GPS:Tracker Location {messageCount}:{Position.X}:{Position.Y}:{Position.Z}:#FF0000:"; // Format the text so it can by copy-pasted into GPS list
+            //Everything has been prepared, we can now open the broadcasting channel
+            antenna.EnableBroadcasting = true;
+            yield return true; //wait* a tick
+            //TODO: Evaluate if this yield is necessary
+            //Send the message
+            IGC.SendBroadcastMessage(broadcastChannel, messageText, TransmissionDistance.TransmissionDistanceMax);  
+    
+            //prepare for ending the send thing
+            yield return true; //wait* a tick
+            yield return true; // wait another tick so this fucking thing actually sends
+	
+            //Close the broadcast so detection is now impossible
+            antenna.EnableBroadcasting = false;
+    
+            //I know i copied the Send method here, and there is probably some way to call the send method as a statemachine, but i couldnt find it and I have an idea which would have me rebuild the script anyway, so ctl+c ctrl+v it is.
             sentInrangeMessage = true;
-            textSurface.WriteText("Found Receiver in range! Sent co-ordinates immedeately!\n", false);
+            textSurface.WriteText("Found Receiver in range! Sent co-ordinates immedeately!\n", true);
             //custom actions box when a reciever has been found in range
 
             //end of custom actions box
