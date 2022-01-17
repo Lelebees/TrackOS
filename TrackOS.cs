@@ -1,4 +1,4 @@
-//Script made by Lelebees: Last update at 1-12-2021 13:18 UTC+1 (Central European Time)
+//Script made by Lelebees: Last update at 17-01-2022 21:39 UTC+1 (Central European Time)
 //TrackOS V1.2.1 (Not backwards compatible)
 
 //Tweakable variables below here
@@ -252,7 +252,8 @@ public IEnumerator<bool> Loop()
             //Close the broadcast so detection is now impossible
             antenna.EnableBroadcasting = false;
     
-            //I know i copied the Send method here, and there is probably some way to call the send method as a statemachine, but i couldnt find it and I have an idea which would have me rebuild the script anyway, so ctl+c ctrl+v it is.
+            //I know i copied the Send method here, and there is probably some way to call the send method as a statemachine, but i couldnt find it 
+            //and I have an idea which would have me rebuild the script anyway, so ctl+c ctrl+v it is.
             sentInrangeMessage = true;
             textSurface.WriteText("Found Receiver in range! Sent co-ordinates immedeately!\n", true);
             //custom actions box when a reciever has been found in range
@@ -272,4 +273,18 @@ public IEnumerator<bool> Loop()
     }
 }
 
-//Virtually Invisible Communication Protocol : VICP
+//Please note, during testing, i found a bug in the script that has minor impact on the effectiveness. I will not be patching it as it is harmless and frankly I can't bring myself to keep developing TrackOS in it's current, majorly flawed form.
+//I am not quitting scripting and this will certainly not be the last time you'll hear from a tracking script, as I've already revealed I am going to rebuild the script completely different
+//For those interested, that is the 3rd rebuild I will do, and hopefully the last.
+//I will not be uploading TrackOS to mod.io. The reason for this is that it takes me too much time (and research) to make a version that is more user friendly,
+//especially for XBox users. That being said, I do plan on uploading the TrackOS rebuild to mod.io after I've implemented user friendliness to it.
+//(Mostly because it will require basically no user guided setup, which means i can get away with shittier implementations)
+
+//For other Scripting developers that wish to use the sending and receiving methods I've developed here, I will upload a separate script to the workshop.
+//I'll most probably call it something like Virtually Invisible Communication Protocol (or VICP), as some may have guessed when they were looking here using V1.2.
+
+//The Github where you can report issues will stay open and I will continue to fix bugs that affect the script in a mayor way.
+//At least, until someone else is willing to pick up the mess that is this code. 
+
+//Leaving tracking range for now,
+//Lelebees
