@@ -282,6 +282,7 @@ public IEnumerator<bool> Loop()
 
 //For other Scripting developers that wish to use the sending and receiving methods I've developed here, I will upload a separate script to the workshop.
 //I'll most probably call it something like Virtually Invisible Communication Protocol (or VICP), as some may have guessed when they were looking here using V1.2.
+//Keep your eyes peeled for that one.
 
 //The Github where you can report issues will stay open and I will continue to fix bugs that affect the script in a mayor way.
 //At least, until someone else is willing to pick up the mess that is this code. 
