@@ -157,7 +157,7 @@ public IEnumerator<bool> Send(string broadcastChannel)
     
     //NOTE: the following comment has been left in to illustrate my struggles with the program, it is no longer relevant
     //okay so that didnt "Work" either. It does get to all this shite but no send. GO 9 YIELDS
-
+    // Ironically, in retrospect, 9 yields was about as far from a solution as i could get. 
     
     // *The program doesn't actually wait. It stops and runs from that point on the next tick. this lowers the instruction count, making the script more preformance friendly, however, we're using it to make a delay in between certain actions
     //IT WORKS, WHAHAHAH YES IT WORKS! FUCK YOU COROUTINES, I AM A GOD OF SCRIPTING! TREMBLE IN FEAR BEFORE THE GREAT AND MIGHTY LELEBEES!
