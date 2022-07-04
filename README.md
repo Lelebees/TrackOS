@@ -8,4 +8,4 @@ There is no mod.io release for TrackOS. There will not be unless someone else wi
 
 Please use this GitHub repo as an issue tracker/ code source. You can freely copy and use TrackOS so long as you do not steal the script. (With which I mean, copy the script and call it your own. If you wish to make small changes, these are allowed, but please credit me for making the original.)
 
-Despite me discontinuing the script, I will continue to fix issues with the script as they arise. If a keen update breaks the script you'll hear about a fix soon enough.
+Despite me discontinuing the script, I will continue to fix major issues with the script as they arise. If a keen update breaks the script you'll hear about a fix soon enough.
